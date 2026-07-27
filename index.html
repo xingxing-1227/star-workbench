@@ -30,6 +30,9 @@ input,button,select{font-family:var(--font);font-size:14px}button{cursor:pointer
 .nl a{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;color:var(--ink2);text-decoration:none;font-size:13px;font-weight:600;transition:.2s;white-space:nowrap}
 .nl a:active{transform:scale(.97)}.nl a.active{background:var(--pks);color:var(--p1)}
 .nl a .ni{font-size:16px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:var(--pb)}.nl a.active .ni{background:var(--pk);color:#fff}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.qb{background:#fff;border:1.5px solid var(--ln);border-radius:12px;padding:14px 6px;text-align:center;cursor:pointer;transition:.2s}.qb:active{transform:scale(.95);background:var(--pks)}.qb .qi{font-size:24px;display:block;margin-bottom:4px}.qb .qt{font-size:12px;color:var(--ink2);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.grid2 .sc{padding:18px 12px;text-align:center;border-radius:14px}
+.tip-item{background:linear-gradient(135deg,var(--ps),var(--pks));padding:14px;border-radius:11px;margin-top:6px}.tip-num{font-size:11px;color:var(--p1);font-weight:700;letter-spacing:1px;display:block;margin-bottom:6px}.tip-text{font-size:13px;color:var(--ink);line-height:1.6}
 .main{flex:1;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));margin-left:180px;height:100vh}
 .page{display:none;max-width:760px;margin:0 auto}.page.active{display:block;animation:fade .3s}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -195,23 +198,22 @@ input,button,select{font-family:var(--font);font-size:14px}button{cursor:pointer
   <div class="dateinfo"><b id="hDate">--</b><span id="hWeek">--</span></div>
   <div class="ps"><div class="pl"><span>今日完成度</span><span id="hPct">0%</span></div><div class="pb2"><i id="hBar" style="width:0%"></i></div></div>
   <div class="nl" id="nav">
-    <a class="active" data-p="home"><span class="ni">🏠</span>首页</a>
     <a data-p="tasks"><span class="ni">📋</span>每日任务</a>
     <a data-p="sleep"><span class="ni">😴</span>睡眠打卡</a>
     <a data-p="plan"><span class="ni">💪</span>健身计划</a>
     <a data-p="weight"><span class="ni">⚖️</span>体重记录</a>
     <a data-p="period"><span class="ni">🌸</span>经期管理</a>
-    <a data-p="breakfast"><span class="ni">🍳</span>早餐打卡</a>
     <a data-p="sport"><span class="ni">🏃</span>运动数据</a>
     <a data-p="saving"><span class="ni">💰</span>存钱计划</a>
-    <a data-p="remind"><span class="ni">🔔</span>打卡提醒</a>
   </div>
 </div>
 <div class="main">
 <div class="page active" id="p-home">
-  <div class="hero">你好，星星<b id="hg">今天也要加油哦 💪</b></div>
-  <div class="sr" id="homeStats"></div>
+  <div class="hero">你好，星星<b id="hg">今天也要加油哦 💜</b></div>
+  <div class="quick"><div class="qb" onclick="go(\'tasks\')"><span class="qi">➕</span><span class="qt">加任务</span></div><div class="qb" onclick="go(\'sleep\')"><span class="qi">💧</span><span class="qt">喝水</span></div><div class="qb" onclick="go(\'plan\')"><span class="qi">💪</span><span class="qt">运动</span></div><div class="qb" onclick="go(\'saving\')"><span class="qi">😊</span><span class="qt">幸福</span></div></div>
+  <div class="grid2" id="homeStats"></div>
   <div class="card"><h2><span class="ico">📌</span>今日打卡总览</h2><p class="sub">点击任意项目快速跳转</p><div id="ovL"></div></div>
+  <div class="card"><h2><span class="ico">📖</span>健康知识速览</h2><p class="sub">每日一条健康小贴士</p><div id="tipL"></div></div>
 </div>
 <div class="page" id="p-tasks">
   <div class="pt"><span class="pi">📋</span>每日任务清单</div><p class="pd">勾选完成，未完成可记录原因。可新增、编辑、删除任务。</p>
@@ -393,7 +395,8 @@ setInterval(()=>{const cfg=load('remind_cfg',REMIND_DEF);const now=new Date();co
 function updateHome(){const tasks=getTasks();const key=tStr();const done=load('tasks_'+key,{});const cnt=tasks.filter((_,i)=>done[i]).length;const pct=tasks.length?Math.round(cnt/tasks.length*100):0;$('#hPct').textContent=pct+'%';$('#hBar').style.width=pct+'%';
 const rec=load('sleep',{});let streak=0,cd=new Date();while(true){const k=cd.getFullYear()+'-'+String(cd.getMonth()+1).padStart(2,'0')+'-'+String(cd.getDate()).padStart(2,'0');if(rec[k]&&rec[k].bed&&rec[k].up){streak++;cd.setDate(cd.getDate()-1)}else break}
 const w=load('weight',[]);const wLast=w.length?w[w.length-1].val:'—';
-$('#homeStats').innerHTML='<div class="sc"><div class="sn">'+cnt+'/'+tasks.length+'</div><div class="sl">今日任务</div></div><div class="sc pk"><div class="sn">'+streak+'</div><div class="sl">睡眠连续</div></div><div class="sc tl"><div class="sn">'+wLast+'</div><div class="sl">最新体重</div></div>';
+const waterKey='water_'+key;const waterNow=parseInt(load(waterKey,0));const bfCal=(load('breakfast',[]).find(x=>x.date===key)||{}).cal||0;const spToday=load('sport',[]).filter(s=>s.date===key).reduce((a,b)=>a+b.cal,0);const spMin=load('sport',[]).filter(s=>s.date===key).reduce((a,b)=>a+b.dur,0);const planDone=load('plan_done',{});const planKey='plan_done_'+key;const planToday=load(planKey,{});const planDone2=Object.values(planToday).filter(Boolean).length;const planTotal=5;
+$('#homeStats').innerHTML='<div class="sc"><div class="sn">'+cnt+'/'+tasks.length+'</div><div class="sl">今日任务</div></div><div class="sc pk"><div class="sn">'+waterNow+'/5</div><div class="sl">喝水进度</div></div><div class="sc tl"><div class="sn">'+spMin+'min</div><div class="sl">运动打卡</div></div><div class="sc or"><div class="sn">'+bfCal+'</div><div class="sl">早餐热量</div></div>';
 const todaySleep=rec[key];const wToday=load('weight',[]).find(x=>x.date===key);const bfToday=load('breakfast',[]).find(x=>x.date===key);const periodNow=load('period',[]).some(p=>{const s=new Date(p.start),e=p.end?new Date(p.end):new Date(p.start);const t=new Date(key);return t>=s&&t<=e});
 const items=[{ico:'📋',bg:'var(--ps)',name:'每日任务',desc:cnt+'/'+tasks.length+'已完成',st:cnt===tasks.length?'done':'pending',p:'tasks'},{ico:'😴',bg:'var(--ps)',name:'睡眠打卡',desc:todaySleep?'入睡'+todaySleep.bed+'·起床'+todaySleep.up:'今日未打卡',st:todaySleep?'done':'miss',p:'sleep'},{ico:'🍳',bg:'var(--ors)',name:'早餐打卡',desc:bfToday?bfToday.name:'今日未记录',st:bfToday?'done':'miss',p:'breakfast'},{ico:'⚖️',bg:'var(--tls)',name:'体重记录',desc:wToday?wToday.val+'kg':'今日未记录',st:wToday?'done':'miss',p:'weight'},{ico:'🌸',bg:'var(--pks)',name:'经期状态',desc:periodNow?'经期中·注意休息':'非经期',st:periodNow?'pending':'done',p:'period'},{ico:'🏃',bg:'var(--tls)',name:'运动记录',desc:isWeekend()?'周末休息日':'今日运动打卡',st:isWeekend()?'done':'pending',p:'sport'},{ico:'💰',bg:'var(--pks)',name:'存钱计划',desc:'每月1号打卡','st':'done',p:'saving'}];
 $('#ovL').innerHTML=items.map(x=>'<div class="ov" onclick="go(\'+x.p+\')"><div class="oi" style="background:'+x.bg+'">'+x.ico+'</div><div class="ob"><div class="on">'+x.name+'</div><div class="od">'+x.desc+'</div></div><div class="os '+(x.st==='done'?'sd':x.st==='pending'?'sp':'sm')+'">'+(x.st==='done'?'已完成':x.st==='pending'?'待打卡':'未打卡')+'</div></div>').join('')}
